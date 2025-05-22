@@ -4,6 +4,7 @@ import config from '../configs';
 import UserModel from '../models/user.model';
 import UserReportModel from '../models/userReport.model';
 import ProductModel from '../models/product.model';
+import ProductImageModel from '../models/productImage.model';
 
 // Start debug sequelize
 console.log('Start create sequelize');
@@ -36,10 +37,20 @@ sequelize.beforeConnect(async(db: any) => {
 const User = UserModel.User(sequelize);
 const UserReport = UserReportModel.UserReport(sequelize);
 const Product = ProductModel.Product(sequelize);
+const ProductImage = ProductImageModel.ProductImage(sequelize);
 
-User.hasMany(UserReport);
+User.hasMany(UserReport, {
+  foreignKey: 'user_id'
+});
 UserReport.belongsTo(User, {
   foreignKey: 'user_id'
+});
+Product.hasMany(ProductImage, {
+  foreignKey: 'productId',
+  as: 'images'
+});
+ProductImage.belongsTo(Product, {
+  foreignKey: 'productId',
 });
 
 const Models = {
@@ -49,6 +60,7 @@ const Models = {
   User,
   UserReport,
   Product,
+  ProductImage,
 };
 
 const connection = { isConnected: false };
@@ -60,6 +72,7 @@ async function connect(): Promise<{
   User: typeof UserModel.UserEntity;
   UserReport: typeof UserReportModel.UserReportEntity;
   Product: typeof ProductModel.ProductEntity;
+  ProductImage: typeof ProductImageModel.ProductImageEntity;
 }> {
   if (connection.isConnected) {
     return Models;

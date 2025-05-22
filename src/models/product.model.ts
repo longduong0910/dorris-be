@@ -6,12 +6,14 @@ class ProductEntity extends Model {
   declare category: 'iPhone' | 'MacBook' | 'iPad' | 'Apple Watch' | 'AirPods' | 'Accessories';
   declare description: string | null;
   declare price: number;
+  declare discountPercent: number | null;
   declare stockQuantity: number;
   declare color: string | null;
   declare storage: string | null;
   declare sku: string;
-  declare imageUrl: string | null;
   declare status: 'active' | 'inactive' | 'out_of_stock';
+  declare flashSale: boolean;
+  declare flashSalePercent: number | null;
   declare createdAt: Date;
   declare updatedAt: Date;
 }
@@ -45,6 +47,11 @@ function Product(sequelize: Sequelize) {
         allowNull: false,
         field: 'price',
       },
+      discountPercent: {
+        type: DataTypes.DECIMAL(5, 2),
+        allowNull: true,
+        field: 'discount_percent',
+      },
       stockQuantity: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -65,16 +72,22 @@ function Product(sequelize: Sequelize) {
         allowNull: false,
         field: 'sku',
       },
-      imageUrl: {
-        type: DataTypes.STRING(255),
-        allowNull: true,
-        field: 'image_url',
-      },
       status: {
         type: DataTypes.ENUM('active', 'inactive', 'out_of_stock'),
         allowNull: false,
         defaultValue: 'active',
         field: 'status',
+      },
+      flashSale: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        field: 'flash_sale',
+      },
+      flashSalePercent: {
+        type: DataTypes.DECIMAL(5, 2),
+        allowNull: true,
+        field: 'flash_sale_percent',
       },
       createdAt: {
         type: DataTypes.DATE,
