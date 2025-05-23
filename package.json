@@ -32,7 +32,8 @@
     "nodemailer": "^7.0.3",
     "nodemon": "^3.1.10",
     "redis": "^5.0.1",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.18",
@@ -45,6 +46,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/nodemon": "^1.19.6",
     "@types/sequelize": "^4.28.20",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-prettier": "^5.2.6",

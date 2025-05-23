@@ -102,4 +102,4 @@ function User(sequelize: Sequelize) {
 export default {
   User,
   UserEntity,
-};
+}

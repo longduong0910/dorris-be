@@ -16,7 +16,8 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
   try {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
-      return res.status(401).json({ message: 'Access Denied. No token provided.' });
+      res.status(401).json({ message: 'Access Denied. No token provided.' });
+      return;
     }
     const { User } = await db.connect();
     // Kiểm tra xem token có hợp lệ không
@@ -28,11 +29,12 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
       },
     });
     if (!user) {
-      return res.status(401).json({ message: 'User not found.' });
+      res.status(401).json({ message: 'User not found.' });
+      return;
     }
     req.user = user;
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Unauthorized. Invalid token.' });
+    res.status(401).json({ message: 'Unauthorized. Invalid token.' });
   }
 }

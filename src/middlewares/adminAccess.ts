@@ -16,7 +16,8 @@ export const adminAccess = async (req: Request, res: Response, next: NextFunctio
   try {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
-      return res.status(401).json({ message: 'Access Denied. No token provided.' });
+      res.status(401).json({ message: 'Access Denied. No token provided.' });
+      return;
     }
     const { User } = await db.connect();
     // Kiểm tra xem token có hợp lệ không
@@ -28,16 +29,18 @@ export const adminAccess = async (req: Request, res: Response, next: NextFunctio
       },
     });
     if (!user) {
-      return res.status(404).json({ message: 'User not found.' });
+      res.status(404).json({ message: 'User not found.' });
+      return;
     }
     // Kiểm tra quyền
     if (user.role !== 'admin') {
-      return res.status(403).json({ message: 'Forbidden. Admin access required.' });
+      res.status(403).json({ message: 'Forbidden. Admin access required.' });
+      return;
     }
     // Gán user vào request để dùng ở controller nếu cần
     req.user = user;
     next(); // Cho phép đi tiếp nếu là admin
   } catch (error) {
-    return res.status(401).json({ message: 'Unauthorized. Invalid token.' });
+    res.status(401).json({ message: 'Unauthorized. Invalid token.' });
   }
 };
