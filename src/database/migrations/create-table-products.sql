@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS products (
     discount_percent DECIMAL(15, 2) DEFAULT NULL,
     stock_quantity INT DEFAULT 0,
     color VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+    color_background VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
     storage VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
     sku VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci UNIQUE NOT NULL UNIQUE,
     status ENUM('active', 'inactive', 'out_of_stock') DEFAULT 'active',

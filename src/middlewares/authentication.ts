@@ -25,7 +25,7 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
     const userId = (decoded as any).payload.userId;
     const user = await User.findOne({
       where: {
-        id: userId,
+        userId: userId,
       },
     });
     if (!user) {

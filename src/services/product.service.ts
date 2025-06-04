@@ -16,12 +16,12 @@ function extractPublicId(imageUrl: string): string | null {
   }
 }
 
-export const getProductById = async (productId: string) => {
+export const getProductBySKU = async (sku: string) => {
   const { Product, ProductImage } = await db.connect();
-  // Tìm sản phẩm theo productId
+  // Tìm sản phẩm theo SKU
   const product = await Product.findOne({
     where: {
-      productId: productId
+      sku: sku
     },
     include: [
       {
@@ -43,11 +43,11 @@ export const getProductById = async (productId: string) => {
   };
 };
 
-export const getProductByCategory = async (category: string) => {
+export const getProductsByName = async (productName: string) => {
   const { Product, ProductImage } = await db.connect();
-  const products = await Product.findAll({
+  const product = await Product.findAll({
     where: {
-      category: category
+      productName: productName,
     },
     include: [
       {
@@ -57,17 +57,86 @@ export const getProductByCategory = async (category: string) => {
       },
     ],
   });
+  if (!product) {
+    return {
+      status: 404,
+      message: 'Product not found!',
+    };
+  }
+  return {
+    status: 200,
+    data: product,
+  };
+}
+
+export const getProductsByCategory = async (category: string) => {
+  const { Product, ProductImage } = await db.connect();
+  const products = await Product.findAll({
+    where: {
+      category: category
+    },
+    include: [
+      {
+        model: ProductImage,
+        as: 'images',
+        attributes: ['imageUrl'], // chỉ lấy trường imageUrl
+        where: { imageDefault: 1 },
+        required: false,
+      },
+    ],
+  });
   if (!products || products.length === 0) {
     return {
       status: 404,
       message: 'No products found in this category!',
     };
   }
+  // Lọc trùng theo tên sản phẩm, chỉ giữ sản phẩm đầu tiên cho mỗi tên
+  const uniqueProductsMap = new Map();
+  for (const product of products) {
+    if (!uniqueProductsMap.has(product.productName)) {
+      uniqueProductsMap.set(product.productName, product);
+    }
+  }
+  const uniqueProducts = Array.from(uniqueProductsMap.values());
   return {
     status: 200,
-    data: products,
+    data: uniqueProducts,
   };
 }
+
+export const getAllProducts = async () => {
+  const { Product, ProductImage } = await db.connect();
+  const products = await Product.findAll({
+    include: [
+      {
+        model: ProductImage,
+        as: 'images',
+        attributes: ['imageUrl'], // chỉ lấy trường imageUrl
+        where: { imageDefault: 1 },
+        required: false,
+      },
+    ],
+  });
+  if (!products || products.length === 0) {
+    return {
+      status: 404,
+      message: 'No products found!',
+    };
+  }
+  // Lọc trùng theo tên sản phẩm, chỉ giữ sản phẩm đầu tiên cho mỗi tên
+  const uniqueProductsMap = new Map();
+  for (const product of products) {
+    if (!uniqueProductsMap.has(product.productName)) {
+      uniqueProductsMap.set(product.productName, product);
+    }
+  }
+  const uniqueProducts = Array.from(uniqueProductsMap.values());
+  return {
+    status: 200,
+    data: uniqueProducts,
+  };
+};
 
 export const createProduct = async (productjson: any) => {
   const { Product, ProductImage } = await db.connect();
@@ -78,6 +147,7 @@ export const createProduct = async (productjson: any) => {
     !productjson.price ||
     !productjson.stockQuantity || 
     !productjson.color ||
+    !productjson.colorBackground ||
     !productjson.storage ||
     !productjson.sku
   ) {
@@ -106,6 +176,7 @@ export const createProduct = async (productjson: any) => {
     price: productjson.price,
     stockQuantity: productjson.stockQuantity,
     color: productjson.color,
+    colorBackground: productjson.colorBackground,
     storage: productjson.storage,
     sku: productjson.sku,
     status: productjson.status || 'active',
@@ -118,7 +189,7 @@ export const createProduct = async (productjson: any) => {
         const stream = cloudinary.uploader.upload_stream(
           {
             folder: 'dorris/products',
-            public_id: `${newProduct.productId}_${index}_${Date.now()}`,
+            public_id: `${newProduct.sku}_${index}_${Date.now()}`,
           },
           (error, result) => {
             if (error) reject(error);
@@ -128,7 +199,7 @@ export const createProduct = async (productjson: any) => {
         stream.end(file.buffer);
       });
       await ProductImage.create({
-        productId: newProduct.productId,
+        sku: newProduct.sku,
         imageUrl: uploadResult.secure_url,
         imageDefault: index === 0, // Chỉ set true nếu là ảnh đầu tiên
       });
@@ -143,7 +214,7 @@ export const createProduct = async (productjson: any) => {
   // Trả về thông tin sản phẩm mới tạo
   const createdProduct = await Product.findOne({
     where: {
-      productId: newProduct.productId,
+      sku: newProduct.sku,
     },
     include: [
       {
@@ -160,7 +231,7 @@ export const createProduct = async (productjson: any) => {
   };
 };
 
-export const updateProduct = async (productId: string, productjson: any) => {
+export const updateProduct = async (sku: string, productjson: any) => {
   const { Product, ProductImage } = await db.connect();
   // Kiểm tra dữ liệu đầu vào
   if (
@@ -169,6 +240,7 @@ export const updateProduct = async (productId: string, productjson: any) => {
     !productjson.price ||
     !productjson.stockQuantity || 
     !productjson.color ||
+    !productjson.colorBackground ||
     !productjson.storage ||
     !productjson.sku
   ) {
@@ -180,7 +252,7 @@ export const updateProduct = async (productId: string, productjson: any) => {
   // Cập nhật sản phẩm
   const updatedProduct = await Product.update(productjson, {
     where: {
-      productId: productId,
+      sku: sku,
     },
   });
   if (!updatedProduct) {
@@ -193,7 +265,7 @@ export const updateProduct = async (productId: string, productjson: any) => {
   const images = productjson.images || [];
   const hasDefault = await ProductImage.findOne({
       where: {
-        productId,
+        sku: sku,
         imageDefault: true,
       },
   });
@@ -203,7 +275,7 @@ export const updateProduct = async (productId: string, productjson: any) => {
         const stream = cloudinary.uploader.upload_stream(
           {
             folder: 'dorris/products',
-            public_id: `${productId}_${index}_${Date.now()}`,
+            public_id: `${sku}_${index}_${Date.now()}`,
           },
           (error, result) => {
             if (error) reject(error);
@@ -213,7 +285,7 @@ export const updateProduct = async (productId: string, productjson: any) => {
         stream.end(file.buffer);
       });
       await ProductImage.create({
-        productId: productId,
+        sku: sku,
         imageUrl: uploadResult.secure_url,
         imageDefault: !hasDefault && index === 0, // Chỉ set true nếu là ảnh đầu tiên
       });
@@ -231,11 +303,13 @@ export const updateProduct = async (productId: string, productjson: any) => {
   };
 }
 
-export const deleteProduct = async (productId: string) => {
+export const deleteProduct = async (sku: string) => {
   const { Product, ProductImage } = await db.connect();
   // Tìm tất cả ảnh liên quan tới product
   const images = await ProductImage.findAll({
-    where: { productId },
+    where: {
+      sku: sku
+    },
   });
   // Xóa ảnh trên Cloudinary
   for (const image of images) {
@@ -251,13 +325,21 @@ export const deleteProduct = async (productId: string) => {
     }
   }
   // Xóa ảnh khỏi database
-  await ProductImage.destroy({
-    where: { productId },
+  const deletedImages = await ProductImage.destroy({
+    where: {
+      sku: sku
+    },
   });
+  if (!deletedImages) {
+    return {
+      status: 404,
+      message: 'Product images not found!',
+    };
+  }
   // Xóa sản phẩm
   const deletedProduct = await Product.destroy({
     where: {
-      productId: productId,
+      sku: sku,
     },
   });
   if (!deletedProduct) {

@@ -25,7 +25,7 @@ export const adminAccess = async (req: Request, res: Response, next: NextFunctio
     const userId = (decoded as any).payload.userId;
     const user = await User.findOne({
       where: {
-        id: userId,
+        userId: userId,
       },
     });
     if (!user) {
@@ -41,6 +41,7 @@ export const adminAccess = async (req: Request, res: Response, next: NextFunctio
     req.user = user;
     next(); // Cho phép đi tiếp nếu là admin
   } catch (error) {
+    console.error('Error in adminAccess middleware:', error);
     res.status(401).json({ message: 'Unauthorized. Invalid token.' });
   }
 };

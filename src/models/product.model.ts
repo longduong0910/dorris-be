@@ -9,6 +9,7 @@ class ProductEntity extends Model {
   declare discountPercent: number | null;
   declare stockQuantity: number;
   declare color: string | null;
+  declare colorBackground: string | null;
   declare storage: string | null;
   declare sku: string;
   declare status: 'active' | 'inactive' | 'out_of_stock';
@@ -61,6 +62,11 @@ function Product(sequelize: Sequelize) {
         type: DataTypes.STRING(50),
         allowNull: true,
         field: 'color',
+      },
+      colorBackground: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
+        field: 'color_background',
       },
       storage: {
         type: DataTypes.STRING(50),

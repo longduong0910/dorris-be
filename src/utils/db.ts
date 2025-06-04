@@ -49,14 +49,16 @@ UserReport.belongsTo(User, {
   foreignKey: 'userId'
 });
 Product.hasMany(ProductImage, {
-  foreignKey: 'productId',
+  foreignKey: 'sku',
+  sourceKey: 'sku',
   as: 'images'
 });
 ProductImage.belongsTo(Product, {
-  foreignKey: 'productId',
+  foreignKey: 'sku',
+  targetKey: 'sku',
 });
 CartItem.hasMany(Product, {
-  foreignKey: 'productId',
+  foreignKey: 'sku',
   as: 'products'
 });
 CartItem.belongsTo(User, {

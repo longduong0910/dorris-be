@@ -5,6 +5,7 @@ import { authentication } from '../middlewares/authentication';
 import * as sso from '../controllers/sso.controller';
 import * as product from '../controllers/product.controller';
 import * as cart from '../controllers/cart.controller';
+import * as user from '../controllers/user.controller';
 import { authOrSession } from '../middlewares/authOrSession';
 
 const router = express.Router();
@@ -20,12 +21,17 @@ router.post('/forgot/request', sso.sendVerifyCode);
 router.post('/forgot/verify', sso.verifyCode);
 router.post('/forgot/reset', sso.resetPassword);
 
+// Routes for user
+router.put('/users/:userId', authentication, user.updateUserInfo);
+
 // Routes for product
-router.get('/products/:productId', product.getProductById);
-router.get('/products/category/:category', product.getProductByCategory);
-router.post('/products', adminAccess, upload.array('images'), product.createProduct);
-router.put('/products/:productId', adminAccess, upload.array('images'), product.updateProduct);
-router.delete('/products/:productId', adminAccess, product.deleteProduct);
+router.get('/products/:sku', product.getProductBySKU);
+router.get('/products/detail/:productName', product.getProductsByName);
+router.get('/products/category/:category', product.getProductsByCategory);
+router.get('/products', product.getAllProducts);
+router.post('/products', upload.array('images'), product.createProduct);
+router.put('/products/:sku', adminAccess, upload.array('images'), product.updateProduct);
+router.delete('/products/:sku', product.deleteProduct);
 
 // Routes for cart
 router.get('/cart', authOrSession, cart.getCart);

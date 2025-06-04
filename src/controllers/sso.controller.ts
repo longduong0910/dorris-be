@@ -3,8 +3,8 @@ import * as ssoService from '../services/sso.service';
 
 export const refreshAccessToken = async (req: Request, res: Response) => {
   try {
-    const { oldRefreshToken } = req.body;
-    const resData = await ssoService.refreshAccessToken(oldRefreshToken);
+    const { refreshToken } = req.body;
+    const resData = await ssoService.refreshAccessToken(refreshToken);
     res.json(resData);
   } catch (error: any) {
     console.log(error);

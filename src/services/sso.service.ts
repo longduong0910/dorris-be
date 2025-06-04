@@ -45,16 +45,25 @@ const generateRefreshToken = (userId: string, secretKey: string, expiresIn: numb
   );
 }
 
-export const refreshAccessToken = async (oldRefreshToken: string) => {
+export const refreshAccessToken = async (refreshToken: string) => {
   // Xác thực refresh token
-  const decoded = jwt.verify(oldRefreshToken, config.SECRET_REFRESH_KEY) as any;
+  const decoded = jwt.verify(refreshToken, config.SECRET_REFRESH_KEY) as any;
   // Lấy thông tin từ payload
-  const { userId, username } = decoded.payload;
+  const { userId } = decoded.payload;
+  // LẤY username TỪ DB
+  const { User } = await db.connect();
+  const user = await User.findByPk(userId);
+  if (!user) {
+    return {
+      status: 401,
+      message: 'User not found!',
+    };
+  }
   // Tạo access token mới
   const newAccessToken = generateAccessToken(
-    userId + ``,
-    username + ``,
-    config.SECRET_KEY + ``,
+    user.userId + '',
+    user.username + '',
+    config.SECRET_KEY + '',
     5 * 60
   );
   return {
@@ -235,6 +244,12 @@ export const register = async (userjson:  any) => {
   });
   // Kiểm tra xem người dùng đã tồn tại hay chưa
   if (user) {
+    if (user.username === userjson.username) {
+      return {
+        status: 400,
+        message: 'Username already exists!',
+      };
+    }
     // Kiểm tra xem người dùng đã đăng ký bằng tài khoản Google hay chưa
     if (userjson.sso_provider === 'google') {
       return {
@@ -273,7 +288,7 @@ export const register = async (userjson:  any) => {
 export const sendVerifyCode = async (email: string) => {
   const { User } = await db.connect();
   // Kiểm tra email có hợp lệ không
-  if (!email) {
+  if (!email || !email.includes('@')) {
     return {
       status: 404,
       message: 'Invalid email!',
@@ -330,13 +345,6 @@ export const verifyCode = async (email: string, code: string) => {
 
 export const resetPassword = async (email: string, newPassword: string) => {
   const { User } = await db.connect();
-  // Kiểm tra email có hợp lệ không
-  if (!email || !newPassword) {
-    return {
-      status: 404,
-      message: 'Invalid email or password!',
-    };
-  }
   const user = await User.findOne({
     where: {
       email: email,
@@ -351,8 +359,17 @@ export const resetPassword = async (email: string, newPassword: string) => {
   }
   // Cập nhật mật khẩu mới
   const hashedPassword = bcrypt.hashSync(newPassword, 8);
-  user.password = hashedPassword;
-  await user.save();
+  const updatedUserPassword = await User.update(
+    { password: hashedPassword },
+    { where: { email: email } }
+  );
+  // Kiểm tra xem mật khẩu có được cập nhật không
+  if (!updatedUserPassword) {
+    return {
+      status: 404,
+      message: 'Failed to update password!',
+    };
+  }
   return {
     status: 200,
     message: 'Password updated!',

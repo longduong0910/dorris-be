@@ -2,7 +2,7 @@ import { Model, Sequelize, DataTypes } from 'sequelize';
 
 class ProductImageEntity extends Model {
   declare id: number;
-  declare productId: number;
+  declare sku: string;
   declare imageUrl: string;
   declare imageDefault: boolean;
   declare createdAt: Date;
@@ -17,10 +17,10 @@ function ProductImage(sequelize: Sequelize) {
         primaryKey: true,
         field: 'id',
       },
-      productId: {
-        type: DataTypes.INTEGER,
+      sku: {
+        type: DataTypes.STRING(50),
         allowNull: false,
-        field: 'product_id',
+        field: 'sku',
       },
       imageUrl: {
         type: DataTypes.STRING(255),
