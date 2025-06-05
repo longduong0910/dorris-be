@@ -15,3 +15,40 @@ export const updateUserInfo = async (req: Request, res: Response) => {
     });
   }
 }
+
+export const getAllShippingAddresses = async (req: Request, res: Response) => {
+  try {
+    const accessToken = req.headers.authorization?.replace('Bearer ', '');
+    if (!accessToken) {
+      res.status(401).json({ status: 401, message: 'Missing access token' });
+      return;
+    }
+    const resData = await userService.getAllShippingAddresses(accessToken);
+    res.json(resData);
+  } catch (error: any) {
+    console.log(error);
+    res.send({
+      status: error.status || 400,
+      message: error.message,
+    });
+  }
+}
+
+export const createShippingAddress = async (req: Request, res: Response) => {
+  try {
+    const accessToken = req.headers.authorization?.replace('Bearer ', '');
+    if (!accessToken) {
+      res.status(401).json({ status: 401, message: 'Missing access token' });
+      return;
+    }
+    const shippingData = req.body;
+    const resData = await userService.createShippingAddress(accessToken, shippingData);
+    res.json(resData);
+  } catch (error: any) {
+    console.log(error);
+    res.send({
+      status: error.status || 400,
+      message: error.message,
+    });
+  }
+}

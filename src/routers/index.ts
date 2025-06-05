@@ -2,11 +2,12 @@ import express from 'express';
 import multer from 'multer';
 import { adminAccess } from '../middlewares/adminAccess';
 import { authentication } from '../middlewares/authentication';
+import { authOrSession } from '../middlewares/authOrSession';
 import * as sso from '../controllers/sso.controller';
 import * as product from '../controllers/product.controller';
 import * as cart from '../controllers/cart.controller';
 import * as user from '../controllers/user.controller';
-import { authOrSession } from '../middlewares/authOrSession';
+import * as voucher from '../controllers/voucher.controller';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -22,6 +23,8 @@ router.post('/forgot/verify', sso.verifyCode);
 router.post('/forgot/reset', sso.resetPassword);
 
 // Routes for user
+router.get('/users/shippingAddress', authentication, user.getAllShippingAddresses);
+router.post('/users/shippingAddress', authentication, user.createShippingAddress);
 router.put('/users/:userId', authentication, user.updateUserInfo);
 
 // Routes for product
@@ -38,5 +41,10 @@ router.get('/cart', authOrSession, cart.getCart);
 router.post('/cart', authOrSession, cart.addToCart);
 router.put('/cart', authOrSession, cart.updateCartItem);
 router.delete('/cart', authOrSession, cart.deleteCartItem);
+
+// Routes for voucher
+router.get('/vouchers', authentication, voucher.getAllVouchers);
+router.get('/vouchers/:code', authentication, voucher.getVoucherByCode);
+router.post('/vouchers', adminAccess, voucher.createVoucher);
 
 export default router;

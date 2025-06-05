@@ -6,6 +6,8 @@ import UserReportModel from '../models/userReport.model';
 import ProductModel from '../models/product.model';
 import ProductImageModel from '../models/productImage.model';
 import cartItemModel from '../models/cartItem.model';
+import voucherModel from '../models/voucher.model';
+import shippingAddressModel from '../models/shippingAddress.model';
 
 // Start debug sequelize
 console.log('Start create sequelize');
@@ -40,12 +42,21 @@ const UserReport = UserReportModel.UserReport(sequelize);
 const Product = ProductModel.Product(sequelize);
 const ProductImage = ProductImageModel.ProductImage(sequelize);
 const CartItem = cartItemModel.CartItem(sequelize);
+const Voucher = voucherModel.Voucher(sequelize);
+const ShippingAddress = shippingAddressModel.ShippingAddress(sequelize);
 
 User.hasMany(UserReport, {
   foreignKey: 'userId',
   as: 'reports'
 });
 UserReport.belongsTo(User, {
+  foreignKey: 'userId'
+});
+User.hasMany(ShippingAddress, {
+  foreignKey: 'userId',
+  as: 'shippingAddresses'
+});
+ShippingAddress.belongsTo(User, {
   foreignKey: 'userId'
 });
 Product.hasMany(ProductImage, {
@@ -65,6 +76,7 @@ CartItem.belongsTo(User, {
   foreignKey: 'userId'
 });
 
+
 const Models = {
   Sequelize,
   sequelize,
@@ -74,6 +86,8 @@ const Models = {
   Product,
   ProductImage,
   CartItem,
+  Voucher,
+  ShippingAddress
 };
 
 const connection = { isConnected: false };
@@ -87,6 +101,8 @@ async function connect(): Promise<{
   Product: typeof ProductModel.ProductEntity;
   ProductImage: typeof ProductImageModel.ProductImageEntity;
   CartItem: typeof cartItemModel.CartItemEntity;
+  Voucher: typeof voucherModel.VoucherEntity;
+  ShippingAddress: typeof shippingAddressModel.ShippingAddressEntity;
 }> {
   if (connection.isConnected) {
     return Models;
