@@ -160,11 +160,20 @@ export const createShippingAddress = async (accessToken: string, addressData: an
     };
   }
   try {
+    // Nếu isDefault=true, cập nhật các địa chỉ khác thành false
+    if (addressData.isDefault === true) {
+      await ShippingAddress.update(
+        { isDefault: false },
+        { where: { userId: userId } }
+      );
+    }
     const newAddress = await ShippingAddress.create({
       userId: userId,
       fullName: addressData.fullName,
       shippingAddress: addressData.shippingAddress,
       phoneNumber: addressData.phoneNumber,
+      note: addressData.note || null,
+      isDefault: addressData.isDefault || false,
     });
     return {
       status: 201,

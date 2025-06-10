@@ -8,6 +8,7 @@ import * as product from '../controllers/product.controller';
 import * as cart from '../controllers/cart.controller';
 import * as user from '../controllers/user.controller';
 import * as voucher from '../controllers/voucher.controller';
+import * as order from '../controllers/order.controller';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -46,5 +47,8 @@ router.delete('/cart', authOrSession, cart.deleteCartItem);
 router.get('/vouchers', authentication, voucher.getAllVouchers);
 router.get('/vouchers/:code', authentication, voucher.getVoucherByCode);
 router.post('/vouchers', adminAccess, voucher.createVoucher);
+
+// Routes for order
+router.post('/orders', adminAccess, order.createOrder);
 
 export default router;

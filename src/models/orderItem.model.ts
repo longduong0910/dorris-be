@@ -1,17 +1,17 @@
 import { Model, Sequelize, DataTypes } from 'sequelize';
 
-class CartItemEntity extends Model {
+class OrderItemEntity extends Model {
   declare id: number;
-  declare userId: number;
-  declare sessionId: string;
+  declare orderId: number;
   declare productId: number;
   declare quantity: number;
+  declare price: number;
   declare createdAt: Date;
-  declare updatedAt: Date;  
+  declare updatedAt: Date;
 }
 
-function CartItem(sequelize: Sequelize) {
-  CartItemEntity.init(
+function OrderItem(sequelize: Sequelize) {
+  OrderItemEntity.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -19,15 +19,10 @@ function CartItem(sequelize: Sequelize) {
         primaryKey: true,
         field: 'id',
       },
-      userId: {
+      orderId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'user_id',
-      },
-      sessionId: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-        field: 'session_id',
+        field: 'order_id',
       },
       productId: {
         type: DataTypes.INTEGER,
@@ -39,21 +34,26 @@ function CartItem(sequelize: Sequelize) {
         allowNull: false,
         field: 'quantity',
       },
+      price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        field: 'price',
+      },
     },
     {
       sequelize,
-      modelName: 'CartItem',
-      tableName: 'cart_items',
+      modelName: 'OrderItem',
+      tableName: 'order_items',
       timestamps: false,
-      createdAt: 'created_at',  
+      createdAt: 'created_at',
       updatedAt: 'updated_at',
     }
   );
 
-  return CartItemEntity;
+  return OrderItemEntity;
 }
 
 export default {
-  CartItem,
-  CartItemEntity,
-}
+  OrderItem,
+  OrderItemEntity,
+};
